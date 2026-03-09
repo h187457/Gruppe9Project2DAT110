@@ -1,116 +1,106 @@
 package no.hvl.dat110.messagetransport;
 
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-
 public class Connection {
 
-	private DataOutputStream outStream; // for writing bytes to the TCP connection
-	private DataInputStream inStream; // for reading bytes from the TCP connection
-	private Socket socket; // socket for the underlying TCP connection
+    private DataOutputStream outStream;
+    private DataInputStream inStream;
+    private Socket socket;
 
-	public Connection(Socket socket) {
+    public Connection(Socket socket) {
 
-		try {
+        try {
 
-			this.socket = socket;
+            this.socket = socket;
 
-			outStream = new DataOutputStream(socket.getOutputStream());
+            outStream = new DataOutputStream(socket.getOutputStream());
+            inStream = new DataInputStream(socket.getInputStream());
 
-			inStream = new DataInputStream (socket.getInputStream());
+        } catch (IOException ex) {
 
-		} catch (IOException ex) {
+            System.out.println("Connection: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
 
-			System.out.println("Connection: " + ex.getMessage());
-			ex.printStackTrace();
-		}
-	}
+    public void send(TransportMessage message) {
 
-	public void send(TransportMessage message) {
+        try {
 
-		// TODO 
-		// encapsulate the data contained in the message and write to the output stream
-		
-		try {
+            byte[] sendbuf = message.encapsulate();
 
-			byte[] sendbuf = message.encapsulate();
+            outStream.write(sendbuf);
+            outStream.flush();
 
-			outStream.write(sendbuf);
+        } catch (IOException ex) {
 
-		} catch (IOException ex) {
+            System.out.println("Connection: " + ex.getMessage());
+            ex.printStackTrace();
+        }
 
-			System.out.println("Connection: " + ex.getMessage());
-			ex.printStackTrace();
-		}
+    }
 
-	}
+    public boolean hasData() {
 
-	public boolean hasData () {
-		
-		boolean hasdata = false;
-		
-		try {
-			
-			hasdata = inStream.available() > 0;
-			
-		} catch (IOException ex) {
+        boolean hasdata = false;
 
-			System.out.println("Connection: " + ex.getMessage());
-			ex.printStackTrace();
-		}
-		
-		return hasdata;
-	}
+        try {
 
-	public TransportMessage receive() {
+            hasdata = inStream.available() > 0;
 
-		TransportMessage message;
-		byte[] recvbuf;
-		
-		// TODO
-		// read a segment from the input stream and decapsulate into message
-		
-		recvbuf = new byte[MessageConfig.SEGMENTSIZE];
-		
-		try {
-				
-			int read = inStream.read(recvbuf,0,MessageConfig.SEGMENTSIZE);
-			
-			if (read != MessageConfig.SEGMENTSIZE) {
-				throw new IOException("receive - missing data");
-			}
-				
-		} catch (IOException ex) {
+        } catch (IOException ex) {
 
-			System.out.println("Connection: " + ex.getMessage());
-			// ex.printStackTrace();
-		}
-		
-		message = new TransportMessage();
-		
-		message.decapsulate(recvbuf);
-		
-		return message;
-		
-	}
+            System.out.println("Connection: " + ex.getMessage());
+            ex.printStackTrace();
+        }
 
-	// close the connection by closing streams and the underlying socket
-	public void close() {
+        return hasdata;
+    }
 
-		try {
-			
-			outStream.close();
-			inStream.close();
+    public TransportMessage receive() {
 
-			socket.close();
-		} catch (IOException ex) {
+        TransportMessage message;
+        byte[] recvbuf;
 
-			System.out.println("Connection: " + ex.getMessage());
-			ex.printStackTrace();
-		}
-	}
+        recvbuf = new byte[MessageConfig.SEGMENTSIZE];
+
+        try {
+
+            int read = inStream.read(recvbuf, 0, MessageConfig.SEGMENTSIZE);
+
+            if (read != MessageConfig.SEGMENTSIZE) {
+                throw new IOException("receive - missing data");
+            }
+
+        } catch (IOException ex) {
+
+            System.out.println("Connection: " + ex.getMessage());
+        }
+
+        message = new TransportMessage();
+
+        message.decapsulate(recvbuf);
+
+        return message;
+
+    }
+
+    public void close() {
+
+        try {
+
+            outStream.close();
+            inStream.close();
+            socket.close();
+
+        } catch (IOException ex) {
+
+            System.out.println("Connection: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
 }

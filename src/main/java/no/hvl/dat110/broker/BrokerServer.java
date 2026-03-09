@@ -26,7 +26,6 @@ public class BrokerServer extends Thread {
 		dispatcher.start();
 		broker.start();
 		
-		// wait for termination of dispatcher and broker threads before stopping broker server
 		try {
 			broker.join();
 			dispatcher.join();

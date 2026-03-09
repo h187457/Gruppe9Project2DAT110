@@ -4,98 +4,89 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import no.hvl.dat110.common.TODO;
 import no.hvl.dat110.common.Logger;
 import no.hvl.dat110.messagetransport.Connection;
 
 public class Storage {
 
-	// data structure for managing subscriptions
-	// maps from a topic to set of subscribed users
-	protected ConcurrentHashMap<String, Set<String>> subscriptions;
-	
-	// data structure for managing currently connected clients
-	// maps from user to corresponding client session object
-	
-	protected ConcurrentHashMap<String, ClientSession> clients;
+    // maps topic -> set of subscribed users
+    protected ConcurrentHashMap<String, Set<String>> subscriptions;
 
-	public Storage() {
-		subscriptions = new ConcurrentHashMap<String, Set<String>>();
-		clients = new ConcurrentHashMap<String, ClientSession>();
-	}
+    // maps user -> client session
+    protected ConcurrentHashMap<String, ClientSession> clients;
 
-	public Collection<ClientSession> getSessions() {
-		return clients.values();
-	}
+    public Storage() {
+        subscriptions = new ConcurrentHashMap<String, Set<String>>();
+        clients = new ConcurrentHashMap<String, ClientSession>();
+    }
 
-	public Set<String> getTopics() {
+    public Collection<ClientSession> getSessions() {
+        return clients.values();
+    }
 
-		return subscriptions.keySet();
+    public Set<String> getTopics() {
+        return subscriptions.keySet();
+    }
 
-	}
+    public ClientSession getSession(String user) {
+        return clients.get(user);
+    }
 
-	// get the session object for a given user
-	// session object can be used to send a message to the user
-	
-	public ClientSession getSession(String user) {
+    public Set<String> getSubscribers(String topic) {
+        return subscriptions.get(topic);
+    }
 
-		ClientSession session = clients.get(user);
+    public void addClientSession(String user, Connection connection) {
 
-		return session;
-	}
+        ClientSession session = new ClientSession(connection);
 
-	public Set<String> getSubscribers(String topic) {
+        clients.put(user, session);
 
-		return (subscriptions.get(topic));
+        Logger.log("Client sessions: " + clients.size());
+    }
 
-	}
+    public void removeClientSession(String user) {
 
-	public void addClientSession(String user, Connection connection) {
+        ClientSession session = clients.remove(user);
 
-		// TODO: add corresponding client session to the storage
-		// See ClientSession class
-		
-		throw new UnsupportedOperationException(TODO.method());
-		
-	}
+        if (session != null) {
+            session.disconnect();
+        }
 
-	public void removeClientSession(String user) {
+        Logger.log("Client sessions: " + clients.size());
+    }
 
-		// TODO: disconnet the client (user) 
-		// and remove client session for user from the storage
-		
-		throw new UnsupportedOperationException(TODO.method());
-		
-	}
+    public void createTopic(String topic) {
 
-	public void createTopic(String topic) {
+        subscriptions.putIfAbsent(topic, ConcurrentHashMap.newKeySet());
 
-		// TODO: create topic in the storage
+        Logger.log("Topic : " + subscriptions.size());
+    }
 
-		throw new UnsupportedOperationException(TODO.method());
-	
-	}
+    public void deleteTopic(String topic) {
 
-	public void deleteTopic(String topic) {
+        subscriptions.remove(topic);
 
-		// TODO: delete topic from the storage
+        Logger.log("Topic removed: " + topic);
+    }
 
-		throw new UnsupportedOperationException(TODO.method());
-		
-	}
+    public void addSubscriber(String user, String topic) {
 
-	public void addSubscriber(String user, String topic) {
+        Set<String> users = subscriptions.get(topic);
 
-		// TODO: add the user as subscriber to the topic
-		
-		throw new UnsupportedOperationException(TODO.method());
-		
-	}
+        if (users != null) {
+            users.add(user);
+            Logger.log("Subscribers : " + topic + " : " + users.size());
+        }
+    }
 
-	public void removeSubscriber(String user, String topic) {
+    public void removeSubscriber(String user, String topic) {
 
-		// TODO: remove the user as subscriber to the topic
+        Set<String> users = subscriptions.get(topic);
 
-		throw new UnsupportedOperationException(TODO.method());
-	}
+        if (users != null) {
+            users.remove(user);
+            Logger.log("Subscribers : " + topic + " : " + users.size());
+        }
+    }
 }

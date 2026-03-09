@@ -37,7 +37,6 @@ public class ClientSession {
 		MessageUtils.send(connection, message);
 	}
 
-	// check whether there is some message on the connection
 	public boolean hasData() {
 
 		return connection.hasData();
