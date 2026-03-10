@@ -38,7 +38,7 @@ public class Storage {
 
     public void addClientSession(String user, Connection connection) {
 
-        ClientSession session = new ClientSession(connection);
+        ClientSession session = new ClientSession(user, connection);
 
         clients.put(user, session);
 

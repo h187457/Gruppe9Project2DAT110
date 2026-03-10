@@ -146,21 +146,26 @@ public class Dispatcher extends Stopable {
         storage.removeSubscriber(user, String.valueOf(topic));
 	}
 
-	public void onPublish(PublishMsg msg) {
+    public void onPublish(PublishMsg msg) {
 
-		Logger.log("onPublish:" + msg.toString());
+        Logger.log("onPublish:" + msg.toString());
 
+        String topic = msg.getTopic();
 
-		MessageType topic = msg.getType();
-        Set<String> subscribers = storage.getSubscribers(String.valueOf(topic));
+        Set<String> subscribers = storage.getSubscribers(topic);
 
-        for (String user : subscribers){
+        if (subscribers == null || subscribers.isEmpty()) {
+            Logger.log("No subscribers for topic: " + topic);
+            return;
+        }
+
+        for (String user : subscribers) {
+
             ClientSession session = storage.getSession(user);
 
-            if (session != null){
+            if (session != null) {
                 session.send(msg);
             }
         }
-
-	}
+    }
 }
