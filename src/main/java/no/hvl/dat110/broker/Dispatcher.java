@@ -154,11 +154,6 @@ public class Dispatcher extends Stopable {
 
         Set<String> subscribers = storage.getSubscribers(topic);
 
-        if (subscribers == null || subscribers.isEmpty()) {
-            Logger.log("No subscribers for topic: " + topic);
-            return;
-        }
-
         for (String user : subscribers) {
 
             ClientSession session = storage.getSession(user);

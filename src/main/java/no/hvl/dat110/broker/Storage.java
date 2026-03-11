@@ -33,7 +33,7 @@ public class Storage {
     }
 
     public Set<String> getSubscribers(String topic) {
-        return subscriptions.get(topic);
+        return subscriptions.getOrDefault(topic, ConcurrentHashMap.newKeySet());
     }
 
     public void addClientSession(String user, Connection connection) {
@@ -72,12 +72,13 @@ public class Storage {
 
     public void addSubscriber(String user, String topic) {
 
+        subscriptions.putIfAbsent(topic, ConcurrentHashMap.newKeySet());
+
         Set<String> users = subscriptions.get(topic);
 
-        if (users != null) {
-            users.add(user);
-            Logger.log("Subscribers : " + topic + " : " + users.size());
-        }
+        users.add(user);
+
+        Logger.log("Subscribers : " + topic + " : " + users.size());
     }
 
     public void removeSubscriber(String user, String topic) {
