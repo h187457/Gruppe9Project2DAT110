@@ -1,5 +1,4 @@
 package no.hvl.dat110.iotsystem;
-
 import no.hvl.dat110.client.Client;
 
 public class TemperatureDevice {
