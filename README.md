@@ -1,7 +1,7 @@
 ## DAT110 - Project 2: Publish-subscribe messaging middleware
 
 ![](assets/skjermbilde.png)
-
+Skjermbilde som viser at programmet fungerer
 ### Handing in the project
 
 1. When the group is ready to hand-in, a **tagged commit** must be pushed to github in order to trigger an action which compiles the solution and runs all test on github. This is done using the following git commands - where *X* is to be replaced by a number:
